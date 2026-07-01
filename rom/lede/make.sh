@@ -34,6 +34,9 @@ for i in $IDXS; do
 		test -f .build_x/$cfg && continue
 		set -x
 		cp feeds/x/rom/lede/$cfg .config
+		if [ "$cfg" = "config.mediatek-filogic-0" ]; then
+			sed -i '/^CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_tenda_be12-pro=/ s/luci-app-openclash/luci-app-homeproxy luci-app-mosdns/' .config
+		fi
 		sed -i "s/CONFIG_VERSION_NUMBER=\".*\"/CONFIG_VERSION_NUMBER=\"$CONFIG_VERSION_NUMBER\"/" ./.config
 		[ "x$i" != "x0" ] && \
 		sed -i "s/CONFIG_VERSION_DIST=\".*\"/CONFIG_VERSION_DIST=\"$CONFIG_VERSION_DIST\"/" ./.config
