@@ -34,8 +34,20 @@ for i in $IDXS; do
 		test -f .build_x/$cfg && continue
 		set -x
 		cp feeds/x/rom/lede/$cfg .config
-		if [ "$cfg" = "config.mediatek-filogic-0" ]; then
+		if [ "x$BE12_ONLY" = "x1" ]; then
+			sed -i -E \
+				'/^CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_.*=y$/ { /DEVICE_tenda_be12-pro=y$/! s/^(CONFIG_[^=]+)=y$/# \1 is not set/; }' \
+				.config
+			sed -i -E 's/^(CONFIG_PACKAGE_[^=]+)=m$/# \1 is not set/' .config
 			sed -i '/^CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_tenda_be12-pro=/ s/luci-app-openclash/luci-app-homeproxy luci-app-mosdns/' .config
+			for package in libruby libyaml ruby ruby-bigdecimal ruby-date ruby-digest ruby-enc ruby-pstore ruby-psych ruby-stringio ruby-yaml unzip; do
+				sed -i "/^CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_tenda_be12-pro=/ s/ $package / /g" .config
+			done
+			for package in luci-app-homeproxy luci-app-mosdns mosdns v2dat v2ray-geoip v2ray-geosite sing-box; do
+				sed -i "/^CONFIG_PACKAGE_${package}=/d; /^# CONFIG_PACKAGE_${package} is not set$/d" .config
+				echo "CONFIG_PACKAGE_${package}=y" >>.config
+			done
+			make defconfig
 		fi
 		sed -i "s/CONFIG_VERSION_NUMBER=\".*\"/CONFIG_VERSION_NUMBER=\"$CONFIG_VERSION_NUMBER\"/" ./.config
 		[ "x$i" != "x0" ] && \
