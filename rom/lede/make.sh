@@ -44,6 +44,7 @@ for i in $IDXS; do
 			done
 			be12_packages="$(sed -n 's/^CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_tenda_be12-pro="\([^"]*\)"/\1/p' .config)"
 			be12_packages="$be12_packages mosdns v2dat v2ray-geoip v2ray-geosite"
+			be12_excluded_packages="kmod-mt7915e kmod-usb-core kmod-usb-common"
 			for package in $be12_packages; do
 				sed -i "/^CONFIG_PACKAGE_${package}=/d; /^# CONFIG_PACKAGE_${package} is not set$/d" .config
 				echo "CONFIG_PACKAGE_${package}=y" >>.config
@@ -54,6 +55,10 @@ for i in $IDXS; do
 					*" $package "*) ;;
 					*) sed -i "/^CONFIG_PACKAGE_${package}=m$/s//# CONFIG_PACKAGE_${package} is not set/" .config ;;
 				esac
+			done
+			for package in $be12_excluded_packages; do
+				sed -i "/^CONFIG_PACKAGE_${package}=/d; /^# CONFIG_PACKAGE_${package} is not set$/d" .config
+				echo "# CONFIG_PACKAGE_${package} is not set" >>.config
 			done
 			make defconfig
 		fi
