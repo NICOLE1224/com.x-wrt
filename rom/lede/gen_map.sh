@@ -135,7 +135,7 @@ for t in $targets; do
 		}
 ##################################
 		}
-		bin=`echo "$bins" | grep $arch | grep -i "\($name-ubi-loader\|$name-ext4-rootfs.img.gz\|$name-ext4-combined-efi.img.gz\|$name-ext4-combined-efi.vmdk.gz\|$name-kernel.bin\|$name-ext4-combined.img.gz\|$name-ext4-sysupgrade\|$name-ext4-sdcard\|$name-ext4-factory\|$name-sdcard\|$name-squashfs\|$name-factory\|$name-initramfs-factory\|$name-initramfs-recovery\|$name-preloader\|$name-bl31-uboot\|$name-emmc-bl31-uboot\|$name-emmc-gpt\|$name-emmc-preloader\|$name-nand-bl31-uboot\|$name-nand-preloader\|$name-initramfs-.*-factory\)"`
+		bin=`echo "$bins" | grep $arch | grep -i "\($name-ubi-loader\|$name-ext4-rootfs.img.gz\|$name-ext4-combined-efi.img.gz\|$name-ext4-combined-efi.vmdk.gz\|$name-kernel.bin\|$name-initramfs-kernel.bin\|$name-ext4-combined.img.gz\|$name-ext4-sysupgrade\|$name-ext4-sdcard\|$name-ext4-factory\|$name-sdcard\|$name-squashfs\|$name-factory\|$name-initramfs-factory\|$name-initramfs-recovery\|$name-preloader\|$name-bl31-uboot\|$name-emmc-bl31-uboot\|$name-emmc-gpt\|$name-emmc-preloader\|$name-nand-bl31-uboot\|$name-nand-preloader\|$name-initramfs-.*-factory\)"`
 		test -n "$bin" || {
 			name=`echo $name | tr _ -`
 			bin=`echo "$bins" | grep -i "\($name-ex\|$name-sq\|$name-fa\|$name-ub\|$name-ue\|$name-in\)"`
