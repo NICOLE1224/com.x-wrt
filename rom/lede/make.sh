@@ -34,6 +34,36 @@ for i in $IDXS; do
 		test -f .build_x/$cfg && continue
 		set -x
 		cp feeds/x/rom/lede/$cfg .config
+		if [ "x$BE12_ONLY" = "x1" ]; then
+			sed -i -E \
+				'/^CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_.*=y$/ { /DEVICE_tenda_be12-pro=y$/! s/^(CONFIG_[^=]+)=y$/# \1 is not set/; }' \
+				.config
+			sed -i '/^CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_tenda_be12-pro=/ s/luci-app-openclash/luci-app-homeproxy luci-app-mosdns/' .config
+			for package in libruby libyaml ruby ruby-bigdecimal ruby-date ruby-digest ruby-enc ruby-pstore ruby-psych ruby-stringio ruby-yaml unzip; do
+				sed -i "/^CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_tenda_be12-pro=/ s/ $package / /g" .config
+			done
+			be12_packages="$(sed -n 's/^CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_tenda_be12-pro="\([^"]*\)"/\1/p' .config)"
+			be12_packages="$be12_packages mosdns v2dat v2ray-geoip v2ray-geosite"
+			be12_excluded_packages="kmod-mt7915e kmod-usb-core kmod-usb-common"
+			sed -i '/^CONFIG_WIFI_SCRIPTS_UCODE=/d; /^# CONFIG_WIFI_SCRIPTS_UCODE is not set$/d' .config
+			echo "CONFIG_WIFI_SCRIPTS_UCODE=y" >>.config
+			for package in $be12_packages; do
+				sed -i "/^CONFIG_PACKAGE_${package}=/d; /^# CONFIG_PACKAGE_${package} is not set$/d" .config
+				echo "CONFIG_PACKAGE_${package}=y" >>.config
+			done
+			make defconfig
+			for package in $(sed -n 's/^CONFIG_PACKAGE_\(.*\)=m$/\1/p' .config); do
+				case " $be12_packages " in
+					*" $package "*) ;;
+					*) sed -i "/^CONFIG_PACKAGE_${package}=m$/s//# CONFIG_PACKAGE_${package} is not set/" .config ;;
+				esac
+			done
+			for package in $be12_excluded_packages; do
+				sed -i "/^CONFIG_PACKAGE_${package}=/d; /^# CONFIG_PACKAGE_${package} is not set$/d" .config
+				echo "# CONFIG_PACKAGE_${package} is not set" >>.config
+			done
+			make defconfig
+		fi
 		sed -i "s/CONFIG_VERSION_NUMBER=\".*\"/CONFIG_VERSION_NUMBER=\"$CONFIG_VERSION_NUMBER\"/" ./.config
 		[ "x$i" != "x0" ] && \
 		sed -i "s/CONFIG_VERSION_DIST=\".*\"/CONFIG_VERSION_DIST=\"$CONFIG_VERSION_DIST\"/" ./.config
